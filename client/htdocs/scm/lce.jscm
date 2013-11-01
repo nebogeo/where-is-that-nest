@@ -85,7 +85,12 @@
 (define image-lib ())
 
 (define (load-image-mutate fn filename)
+  (msg "hello")
+  (msg filename)
   (let ((image (js "new Image()")))
+    (set! image.onerror
+          (lambda ()
+            (msg (+ "error loading:" fn))))
     (set! image.onload
           (mutate-game
            (lambda (c)

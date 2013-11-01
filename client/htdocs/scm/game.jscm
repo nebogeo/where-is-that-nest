@@ -18,8 +18,6 @@
 (console.log "hello")
 
 (define easy-filenames
-  (map
-   (lambda (f) (string-append "easy/" f))
    (list
     "ChTr002.jpg" "ChTr003.jpg" "ChTr004.jpg" "CuTe001-2013.jpg" "CuTe001.jpg"
     "CuTe002.jpg" "CuTe003.jpg" "CuTe004.jpg" "CuTe005.jpg" "CuTe006.jpg" "CuTe007.jpg"
@@ -29,11 +27,9 @@
     "VC004.jpg" "VC005.jpg" "VC008.jpg" "VC009.jpg" "VC010.jpg" "VC011.jpg" "VC012.jpg"
     "VC013.jpg" "VC014.jpg" "VC015-2013.jpg" "VC015.jpg" "VC017.jpg" "VC021.jpg"
     "VC023.jpg" "VC025.jpg" "VC030.jpg" "VC031.jpg" "VC032.jpg" "VC033.jpg"
-    "VC034.jpg" "VS001.jpg" "VS002.jpg" "VS003-2013.jpg" "VS003.jpg")))
+    "VC034.jpg" "VS001.jpg" "VS002.jpg" "VS003-2013.jpg" "VS003.jpg"))
 
 (define hard-filenames
-  (map
-   (lambda (f) (string-append "hard/" f))
    (list
     "ChMa002.jpg" "ChMa003.jpg" "ChMa004.jpg" "ChMa006.jpg" "ChMa007.jpg" "ChMa008.jpg"
     "ChPa001.jpg" "ChPa003.jpg" "RC001-2013.jpg" "RC001.jpg" "RC003-2013.jpg"
@@ -41,17 +37,14 @@
     "RC008.jpg" "RC009.jpg" "RC010.jpg" "RC011.jpg" "RC020.jpg" "VA003-SA2013.jpg"
     "VC003-2013.jpg" "VC005-2013.jpg" "VC006-2013.jpg" "VC006.jpg" "VC009-2013.jpg"
     "VC010-2013.jpg" "VC011-2013.jpg" "VC012-2013.jpg" "VC013-2013.jpg" "VC022.jpg"
-    "VC026.jpg" "VC027.jpg" "VC037.jpg" "VS001-2013.jpg")))
+    "VC026.jpg" "VC027.jpg" "VC037.jpg" "VS001-2013.jpg"))
 
-(define filenames (easy-filenames.concat hard-filenames))
-
-
-;(set! filenames
-;      (filenames.concat
-;       (map
-;        (lambda (fn)
-;          (+ "mongoose-" fn))
-;        filenames)))
+(define filenames
+  (append
+   (map (lambda (f) (string-append "easy/" f)) easy-filenames)
+   (map (lambda (f) (string-append "hard/" f)) hard-filenames)
+   (map (lambda (f) (string-append "easy/mongoose-" f)) easy-filenames)
+   (map (lambda (f) (string-append "hard/mongoose-" f)) hard-filenames)))
 
 (define photos
   (map
@@ -324,7 +317,7 @@
 (define (nightjar-new-game-images c)
   (define start 0)
   (when (eq? (nightjar-player-type (game-data c)) "monkey")
-        (set! start 40))
+        (set! start 90))
   (play-sound "sound/button.wav")
 
   (let ((images (crop (shuffle (slice nightjar-examples start 39)) 20)))
@@ -353,7 +346,7 @@
      (empty-nightjar-data))
    (game-modify-render
     (lambda (ctx)
-      (nightjar-heading ctx "Where is that nest?")
+      (nightjar-heading ctx "Where is that nest")
       (nightjar-text ctx "Spot eggs and help us with our research")
       (set! ctx.globalAlpha 0.8)
       (set! ctx.fillStyle "#ffffff")

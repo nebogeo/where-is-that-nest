@@ -15,56 +15,43 @@
 ;; You should have received a copy of the GNU Affero General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(define filenames
-  (list
-   "Reflectance_CF003_V_rgb_0.46-r.jpg"
-   "Reflectance_CF004_V_rgb_0.63-r.jpg"
-   "Reflectance_CF005_V_rgb_0.53-r.jpg"
-   "Reflectance_CF006_V_rgb_0.57-r.jpg"
-   "Reflectance_CF007_V_rgb_0.61-r.jpg"
-   "Reflectance_CF008_V_rgb_0.41-r.jpg"
-   "Reflectance_CF009_V_rgb_0.69-r.jpg"
-   "Reflectance_CF010_V_rgb_0.49-r.jpg"
-   "Reflectance_CF011_V_rgb_0.43-r.jpg"
-   "Reflectance_CF012_V_rgb_0.41-r.jpg"
-   "Reflectance_CF013_V_rgb_0.56-r.jpg"
-   "Reflectance_CF014_V_rgb_0.67-r.jpg"
-   "Reflectance_CF015_V_Rgb_0.65-r.jpg"
-   "Reflectance_CF017_V_rgb_0.54-r.jpg"
-   "Reflectance_CF020_V_rgb_0.47-r.jpg"
-   "Reflectance_CF021_V_rgb_0.52-r.jpg"
-   "Reflectance_CF022_V_rgb_0.52-r.jpg"
-   "Reflectance_CF024_V_rgb_0.57-r.jpg"
-   "Reflectance_CF025_V_rgb_0.33-r.jpg"
-   "Reflectance_CF026_V_rgb_0.55-r.jpg"
-   "Reflectance_CF027_V_rgb_0.45-r.jpg"
-   "Reflectance_CF028_V_rgb_0.55-r.jpg"
-   "Reflectance_CF030_V_rgb_0.47-r.jpg"
-   "Reflectance_CF032_V_rgb_0.58-r.jpg"
-   "Reflectance_CF035_V_rgb_0.50-r.jpg"
-   "Reflectance_CF036_V_rgb_0.48-r.jpg"
+(console.log "hello")
 
-   "Reflectance_CP005_V_rgb_0.62-r.jpg"
-   "Reflectance_CP007_V_rgb_0.40-r.jpg"
-   "Reflectance_CP011_V_rgb_0.58-r.jpg"
-   "Reflectance_CP014_V_rgb_0.36-r.jpg"
-   "Reflectance_CP017_V_rgb_0.52-r.jpg"
-   "Reflectance_CP018_V_Rgb_0.55-r.jpg"
-   "Reflectance_CP020_V_rgb_0.44-r.jpg"
-   "Reflectance_CP031_V_rgb_0.25-r.jpg"
+(define easy-filenames
+  (map
+   (lambda (f) (string-append "easy/" f))
+   (list
+    "ChTr002.jpg" "ChTr003.jpg" "ChTr004.jpg" "CuTe001-2013.jpg" "CuTe001.jpg"
+    "CuTe002.jpg" "CuTe003.jpg" "CuTe004.jpg" "CuTe005.jpg" "CuTe006.jpg" "CuTe007.jpg"
+    "CuTe009.jpg" "CuTe010.jpg" "RC002.jpg" "RC005-2013.jpg" "RC007.jpg" "RC013.jpg"
+    "RC014.jpg" "RC015.jpg" "RC016_2ndegg.jpg" "RC016.jpg" "RC017.jpg" "VC001-2013.jpg"
+    "VC001.jpg" "VC001-SA2013.jpg" "VC002-2013.jpg" "VC002.jpg" "VC003.jpg" "VC004-2013.jpg"
+    "VC004.jpg" "VC005.jpg" "VC008.jpg" "VC009.jpg" "VC010.jpg" "VC011.jpg" "VC012.jpg"
+    "VC013.jpg" "VC014.jpg" "VC015-2013.jpg" "VC015.jpg" "VC017.jpg" "VC021.jpg"
+    "VC023.jpg" "VC025.jpg" "VC030.jpg" "VC031.jpg" "VC032.jpg" "VC033.jpg"
+    "VC034.jpg" "VS001.jpg" "VS002.jpg" "VS003-2013.jpg" "VS003.jpg")))
 
-   "Reflectance_MV002_V_rgb_0.54-r.jpg"
-   "Reflectance_MV004_V_rgb_0.40-r.jpg"
-   "Reflectance_MV005_V_rgb_0.55-r.jpg"
-   "Reflectance_MV006_V_rgb_0.44-r.jpg"
-   "Reflectance_MV007_V_rgb_0.49-r.jpg"))
+(define hard-filenames
+  (map
+   (lambda (f) (string-append "hard/" f))
+   (list
+    "ChMa002.jpg" "ChMa003.jpg" "ChMa004.jpg" "ChMa006.jpg" "ChMa007.jpg" "ChMa008.jpg"
+    "ChPa001.jpg" "ChPa003.jpg" "RC001-2013.jpg" "RC001.jpg" "RC003-2013.jpg"
+    "RC003_2ndegg.jpg" "RC003.jpg" "RC004-2013.jpg" "RC004.jpg" "RC005.jpg" "RC006.jpg"
+    "RC008.jpg" "RC009.jpg" "RC010.jpg" "RC011.jpg" "RC020.jpg" "VA003-SA2013.jpg"
+    "VC003-2013.jpg" "VC005-2013.jpg" "VC006-2013.jpg" "VC006.jpg" "VC009-2013.jpg"
+    "VC010-2013.jpg" "VC011-2013.jpg" "VC012-2013.jpg" "VC013-2013.jpg" "VC022.jpg"
+    "VC026.jpg" "VC027.jpg" "VC037.jpg" "VS001-2013.jpg")))
 
-(set! filenames
-      (filenames.concat
-       (map
-        (lambda (fn)
-          (+ "mongoose-" fn))
-        filenames)))
+(define filenames (easy-filenames.concat hard-filenames))
+
+
+;(set! filenames
+;      (filenames.concat
+;       (map
+;        (lambda (fn)
+;          (+ "mongoose-" fn))
+;        filenames)))
 
 (define photos
   (map
@@ -90,46 +77,106 @@
 (define image-centre-y (/ image-height 2))
 
 (define positions
-  (list
-   (list 932 790 454 134)
-   (list 981 818 378 92)
-   (list 904 768 465 139)
-   (list 904 763 476 144)
-   (list 1030 778 546 156)
-   (list 917 751 488 157)  ;;  cf08
-   (list 1008 766 328 119)
-   (list 1153 783 466 119)
-   (list 1095 763 406 118)
-   (list 910 752 480 154)
-   (list 1112 738 536 174) ;;  cf014
-   (list 1093 773 423 114)
-   (list 1140 766 332 133)
-   (list 1077 743 345 110)
-   (list 1126 738 354 129)
-   (list 1075 761 259 101)
-   (list 1108 775 369 98)
-   (list 1047 783 351 103)
-   (list 1016 721 422 166)
-   (list 1000 766 405 132) ;;   cf26
-   (list 1133 755 331 125)
-   (list 1025 773 350 118)
-   (list 1150 777 326 110)
-   (list 1100 754 352 111)
-   (list 1053 782 294 104)
-   (list 1058 798 308 92)
-   (list 1130 802 400 131)
-   (list 963 751 449 133)
-   (list 1059 766 505 156)
-   (list 922 750 551 133)
-   (list 994 740 408 167)
-   (list 1091 779 408 119)
-   (list 1151 717 342 126)
-   (list 996 768 372 129)
-   (list 970 753 387 129);;   mv02
-   (list 1122 746 423 157);;  mv04
-   (list 989 773 332 118)
-   (list 936 764 447 173)
-   (list 984 702 408 180)))
+  (map
+   (lambda (i)
+     (list
+      (* (list-ref i 0) 0.5)
+      (* (list-ref i 1) 0.5)
+      (* (list-ref i 2) 0.5)
+      (* (list-ref i 3) 0.5)))
+   (list
+    (list 2400 1601 157 121)
+   (list 2354 1668 164 108)
+   (list 2427 1502 154 106)
+   (list 2403 1609 213 104)
+   (list 2324 1504 240 136)
+   (list 2513 1593 198 108)
+   (list 2425 1755 142 107)
+   (list 2358 1547 218 129)
+   (list 2383 1592 192 136)
+   (list 2378 1518 119 140)
+   (list 2389 1585 161 91)
+   (list 2308 1711 143 127)
+   (list 2399 1530 205 148)
+   (list 2454 1484 151 137)
+   (list 2356 1449 266 144)
+   (list 2293 1546 299 163)
+   (list 2354 1731 174 98)
+   (list 2321 1593 278 126)
+   (list 2353 1479 252 156)
+   (list 2315 1651 267 125)
+   (list 2419 1712 227 123)
+   (list 2328 1495 295 158)
+   (list 2329 1617 309 120)
+   (list 2343 1581 268 120)
+   (list 2350 1640 179 117)
+   (list 2354 1573 251 101)
+   (list 2315 1614 290 159)
+   (list 2258 1582 311 162)
+   (list 2356 1591 249 118)
+   (list 2414 1583 264 126)
+   (list 2382 1593 227 148)
+   (list 2346 1614 274 103)
+   (list 2461 1494 181 117)
+   (list 2338 1577 246 109)
+   (list 2305 1654 279 115)
+   (list 2318 1588 284 111)
+   (list 2388 1582 254 95)
+   (list 2320 1636 266 125)
+   (list 2327 1563 281 141)
+   (list 2350 1533 236 143)
+   (list 2331 1596 252 110)
+   (list 2381 1495 289 124)
+   (list 2328 1604 276 121)
+   (list 2330 1658 280 127)
+   (list 2348 1681 291 117)
+   (list 2427 1646 142 125)
+   (list 2288 1599 274 113)
+   (list 2302 1611 244 161)
+   (list 2286 1578 311 172)
+   (list 2217 1588 420 185)
+   (list 2269 1565 428 188)
+   (list 2298 1532 350 129)
+   (list 2303 1535 319 166)
+
+   (list 2382 1621 183 123)
+   (list 2371 1593 170 128)
+   (list 2365 1641 220 98)
+   (list 2375 1569 195 92)
+   (list 2407 1613 237 88)
+   (list 2411 1701 225 89)
+   (list 2459 1604 164 128)
+   (list 2406 1515 129 108)
+   (list 2333 1556 277 134)
+   (list 2379 1498 158 144)
+   (list 2415 1589 172 136)
+   (list 2242 1629 258 120)
+   (list 2437 1517 291 153)
+   (list 2299 1578 281 125)
+   (list 2307 1613 298 151)
+   (list 2347 1498 292 194)
+   (list 2445 1546 228 113)
+   (list 2304 1668 255 128)
+   (list 2350 1574 253 107)
+   (list 2350 1695 216 126)
+   (list 2399 1712 150 84)
+   (list 2494 1695 267 136)
+   (list 2329 1775 158 78)
+   (list 2360 1620 254 111)
+   (list 2472 1617 277 100)
+   (list 2366 1514 247 98)
+   (list 2288 1588 288 101)
+   (list 2353 1715 257 138)
+   (list 2382 1690 133 92)
+   (list 2366 1643 167 79)
+   (list 2335 1612 177 111)
+   (list 2344 1531 255 105)
+   (list 2333 1637 336 122)
+   (list 2364 1679 237 95)
+   (list 2370 1645 266 101)
+   (list 2329 1564 241 106)
+   (list 2293 1611 347 116))))
+
 
 (define (build-examples n)
   (cond

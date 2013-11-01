@@ -95,6 +95,9 @@
 
 (define (load-image! fn finished images)
   (let ((image (js "new Image()")))
+    (set! image.onerror
+          (lambda ()
+            (msg (+ "error loading:" fn))))
     (set! image.onload
           (lambda ()
             ;;(console.log (+ "loaded " (+ "images/" fn)))

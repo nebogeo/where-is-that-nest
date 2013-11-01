@@ -524,7 +524,7 @@
     (list
 
      (image-button
-      "Monkey"
+      "Baboon"
       (+ default-button-x button-gap)
       default-button-y
       #t
@@ -538,7 +538,7 @@
           c))))
 
      (image-button
-      "Mongoose"
+      "Genet"
       (- default-button-x button-gap)
       default-button-y
       #t

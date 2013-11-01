@@ -318,7 +318,7 @@
          (find-image (nightjar-example-file example) image-lib)
          (car (nightjar-image-pos (game-data c)))
          (cadr (nightjar-image-pos (game-data c))))
-        (nightjar-all-text ctx "Loading your next nightjar...")))
+        (nightjar-all-text ctx "Loading your next nest...")))
     c)))
 
 (define (nightjar-new-game-images c)
@@ -342,7 +342,7 @@
      ()
      (game-modify-render
       (lambda (ctx)
-        (nightjar-all-text ctx "Loading your first nightjar..."))
+        (nightjar-all-text ctx "Loading your first nest..."))
         c))))
 
 (define (nightjar-intro c)
@@ -353,8 +353,8 @@
      (empty-nightjar-data))
    (game-modify-render
     (lambda (ctx)
-      (nightjar-heading ctx "Where is that nightjar")
-      (nightjar-text ctx "Hunt nightjars and help us with our research")
+      (nightjar-heading ctx "Where is that nest?")
+      (nightjar-text ctx "Spot eggs and help us with our research")
       (set! ctx.globalAlpha 0.8)
       (set! ctx.fillStyle "#ffffff")
       (ctx.fillRect 0 (+ icon-y 180) 1500 100)
@@ -576,7 +576,7 @@
    (lambda (ctx)
      (ctx.drawImage (find-image "nightjar.jpg" image-lib) 250 200)
      (set! ctx.font "bold 50pt gnuolane")
-     (wrap-text ctx "There is one nightjar hidden in every photo, touch it as soon as you see it" 100 100 1000 75))
+     (wrap-text ctx "There is one nest hidden in every photo, touch it as soon as you see it" 100 100 1000 75))
    (game-modify-buttons
     (list
 
@@ -739,7 +739,7 @@
      (list
 
       (image-button
-       "Next nightjar"
+       "Next nest"
        (- default-button-x button-gap)
        (+ default-button-y 50) #t
        (feather)
@@ -779,7 +779,7 @@
       (nightjar-sprite (game-data c)))
 
      (let ((done (+ (- 20 (length (nightjar-images (game-data c)))) 1)))
-       (nightjar-heading ctx (+ "Nightjar " done "/20 found in "
+       (nightjar-heading ctx (+ "Nest " done "/20 found in "
                                 (/ (nightjar-score (game-data c)) 1000)
                                 " seconds"))))
 
@@ -789,7 +789,7 @@
     (game-modify-buttons
      (list
       (image-button
-       "Next nightjar"
+       "Next nest"
        default-button-x
        (+ default-button-y 50) #t
        (feather)

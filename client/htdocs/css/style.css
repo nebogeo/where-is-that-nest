@@ -19,5 +19,5 @@ html, body {
 #canvas {
     width: auto;
     height: 100%;
-    background: url(http://nightjar.exeter.ac.uk/where-is-that-nightjar/images/bg.png);
+    background: url(../images/bg.png);
 }

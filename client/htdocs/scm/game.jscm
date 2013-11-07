@@ -193,7 +193,7 @@
   (list (- (* screen-width (+ safe-x (* (rndf) (- 1 (* safe-x 2))))) image-centre-x)
         (- (* screen-height (+ safe-y (* (rndf) (- 1 (* safe-y 2))))) image-centre-y)))
 
-(define default-button-x (- (/ screen-width 2) 280))
+(define default-button-x (- (/ screen-width 2) 120))
 (define default-button-y (+ (/ screen-height 2) 20))
 (define button-gap 250)
 (define game-time-allowed 30)
@@ -453,8 +453,8 @@
            (lambda (title id)
              (image-button
               title
-              default-button-x
-              (+ 150 (* id 130))
+              (+ (- default-button-x 600) (* id 200))
+              (- default-button-y 100)
               #t
               (feather)
               (lambda (c)
@@ -576,7 +576,7 @@
      (image-button
       "Start playing"
       default-button-x
-      (+ default-button-y 300)
+      (+ default-button-y 200)
       #t
       (feather)
       (lambda (c)

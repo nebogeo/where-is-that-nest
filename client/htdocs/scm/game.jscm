@@ -15,8 +15,6 @@
 ;; You should have received a copy of the GNU Affero General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(console.log "hello")
-
 (define easy-filenames
    (list
     "ChTr002.jpg" "ChTr003.jpg" "ChTr004.jpg" "CuTe001-2013.jpg" "CuTe001.jpg"
@@ -40,17 +38,22 @@
     "VC026.jpg" "VC027.jpg" "VC037.jpg" "VS001-2013.jpg"))
 
 (define filenames
-  (append
+  (list
    (map (lambda (f) (string-append "easy/" f)) easy-filenames)
-   (map (lambda (f) (string-append "hard/" f)) hard-filenames)
    (map (lambda (f) (string-append "easy/mongoose-" f)) easy-filenames)
+   (map (lambda (f) (string-append "hard/" f)) hard-filenames)
    (map (lambda (f) (string-append "hard/mongoose-" f)) hard-filenames)))
 
 (define photos
   (map
-   (lambda (fn)
-     (+ "photos/" fn))
+   (lambda (l)
+     (map (lambda (fn) (+ "photos/" fn)) l))
    filenames))
+
+(define (easy-photos l) (list-ref l 0))
+(define (easy-mongoose-photos l) (list-ref l 1))
+(define (hard-photos l) (list-ref l 2))
+(define (hard-mongoose-photos l) (list-ref l 3))
 
 (define (feather)
   (choose (list "feather1.png" "feather2.png" "feather3.png")))
@@ -69,7 +72,7 @@
 (define image-centre-x (/ image-width 2))
 (define image-centre-y (/ image-height 2))
 
-(define positions
+(define easy-positions
   (map
    (lambda (i)
      (list
@@ -130,9 +133,18 @@
    (list 2217 1588 420 185)
    (list 2269 1565 428 188)
    (list 2298 1532 350 129)
-   (list 2303 1535 319 166)
+   (list 2303 1535 319 166))))
 
-   (list 2382 1621 183 123)
+(define hard-positions
+  (map
+   (lambda (i)
+     (list
+      (* (list-ref i 0) 0.5)
+      (* (list-ref i 1) 0.5)
+      (* (list-ref i 2) 0.5)
+      (* (list-ref i 3) 0.5)))
+   (list
+    (list 2382 1621 183 123)
    (list 2371 1593 170 128)
    (list 2365 1641 220 98)
    (list 2375 1569 195 92)
@@ -170,21 +182,29 @@
    (list 2329 1564 241 106)
    (list 2293 1611 347 116))))
 
-
-(define (build-examples n)
+(define (build-examples n photos level)
   (cond
    ((zero? n) ())
    (else
-    (let ((pos (list-ref positions (modulo n (length positions)))))
+    (let ((pos (list-ref
+                (if (eq? level 0)
+                    easy-positions hard-positions) n)))
       (cons
        (nightjar-example
         (list-ref photos n)
         (list (list-ref pos 0) (list-ref pos 1))
         (list-ref pos 2)
         (list-ref pos 3))
-       (build-examples (- n 1)))))))
+       (build-examples (- n 1) photos level))))))
 
-(define nightjar-examples (build-examples (- (length photos) 1)))
+(define nightjar-examples
+  (list
+   (build-examples (- (length (easy-photos photos)) 1) (easy-photos photos) 0)
+   (build-examples (- (length (easy-mongoose-photos photos)) 1) (easy-mongoose-photos photos) 0)
+   (build-examples (- (length (hard-photos photos)) 1) (hard-photos photos) 1)
+   (build-examples (- (length (hard-mongoose-photos photos)) 1) (hard-mongoose-photos photos) 1)))
+
+(msg "hello")
 
 (define safe-x 0.2)
 (define safe-y 0.2)
@@ -199,7 +219,7 @@
 (define game-time-allowed 30)
 
 (define (empty-nightjar-data)
-  (list 0 0 0 "" #f 0 () () 0 (sprite 0 0 "wrong.png" 0)))
+  (list 0 0 0 "" #f 0 () () 0 (sprite 0 0 "wrong.png" 0) 0))
 
 (define (nightjar-start-time g) (list-ref g 0))
 (define (nightjar-modify-start-time v g) (list-replace g 0 v))
@@ -221,6 +241,8 @@
 (define (nightjar-modify-score v g) (list-replace g 8 v))
 (define (nightjar-sprite g) (list-ref g 9))
 (define (nightjar-modify-sprite v g) (list-replace g 9 v))
+(define (nightjar-level g) (list-ref g 10))
+(define (nightjar-modify-level v g) (list-replace g 10 v))
 
 (define (nightjar-heading ctx txt)
   (set! ctx.fillStyle "#000")
@@ -315,12 +337,19 @@
     c)))
 
 (define (nightjar-new-game-images c)
-  (define start 0)
-  (when (eq? (nightjar-player-type (game-data c)) "monkey")
-        (set! start 90))
+  (let ((examples (cond
+                   ((eq? (nightjar-player-type (game-data c)) "monkey")
+                    (if (zero? (nightjar-level (game-data c)))
+                        (easy-photos nightjar-examples)
+                        (hard-photos nightjar-examples)))
+                   (else
+                    (if (zero? (nightjar-level (game-data c)))
+                        (easy-mongoose-photos nightjar-examples)
+                        (hard-mongoose-photos nightjar-examples))))))
+
   (play-sound "sound/button.wav")
 
-  (let ((images (crop (shuffle (slice nightjar-examples start 39)) 20)))
+  (let ((images (crop (shuffle examples) 20)))
     (load-image-mutate
      (lambda (c)
        (nightjar-new-game
@@ -336,7 +365,7 @@
      (game-modify-render
       (lambda (ctx)
         (nightjar-all-text ctx "Loading your first nest..."))
-        c))))
+        c)))))
 
 (define (nightjar-intro c)
   (let ((icon-x 150)
@@ -574,7 +603,7 @@
     (list
 
      (image-button
-      "Start playing"
+      "Level 1"
       default-button-x
       (+ default-button-y 200)
       #t
@@ -839,9 +868,23 @@
     (game-modify-buttons
      (list
 
+     (image-button
+      "Level 2"
+      (- default-button-x 200)
+      (+ default-button-y 200)
+      #t
+      (feather)
+      (lambda (c)
+        (nightjar-new-game-images
+         (game-modify-data
+          (lambda (d)
+            (nightjar-modify-level 1 d))
+          c))))
+
+
       (image-button
        "Back"
-       default-button-x
+       (+ default-button-x 200)
        (+ default-button-y 200)
        #t
        (feather)

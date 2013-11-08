@@ -58,6 +58,9 @@
 (define (feather)
   (choose (list "feather1.png" "feather2.png" "feather3.png")))
 
+(define (small-feather)
+  (choose (list "feather1s.png" "feather2s.png" "feather3s.png")))
+
 (define (nightjar-example file pos width height)
   (list file pos width height))
 
@@ -219,7 +222,7 @@
 (define game-time-allowed 30)
 
 (define (empty-nightjar-data)
-  (list 0 0 0 "" #f 0 () () 0 (sprite 0 0 "wrong.png" 0) 0))
+  (list 0 0 0 "" #f 0 () () 0 (sprite 0 0 "wrong.png" 0) 0 "???"))
 
 (define (nightjar-start-time g) (list-ref g 0))
 (define (nightjar-modify-start-time v g) (list-replace g 0 v))
@@ -243,6 +246,8 @@
 (define (nightjar-modify-sprite v g) (list-replace g 9 v))
 (define (nightjar-level g) (list-ref g 10))
 (define (nightjar-modify-level v g) (list-replace g 10 v))
+(define (nightjar-username g) (list-ref g 11))
+(define (nightjar-modify-username v g) (list-replace g 11 v))
 
 (define (nightjar-heading ctx txt)
   (set! ctx.fillStyle "#000")
@@ -386,7 +391,7 @@
      (list
       (image-button
        "Start playing"
-       default-button-x
+       (- default-button-x 200)
        default-button-y
        #t
        (feather)
@@ -395,12 +400,27 @@
          (nightjar-experiment-screen c)))
 
       (image-button
+       "Hi Scores"
+       (+ default-button-x 200)
+       default-button-y
+       #t
+       (feather)
+       (lambda (c)
+         (server-call-mutate
+          "hiscores" ()
+          (lambda (game data)
+            (let ((hiscores (JSON.parse data)))
+              (msg "in")
+              (dbg (nightjar-hiscores hiscores game)))))
+         (play-sound "sound/button.wav")
+         c))
+
+      (image-button
        "Back to site" 10 (- icon-y 20) #f "back.png"
        (lambda (c)
          (play-sound "sound/button.wav")
          (set! window.location "http://nightjar.exeter.ac.uk/story/games")
          c))
-
 
       (image-button
        "" (+ icon-x 50) (+ icon-y 190) #f "sensory-ecology.png"
@@ -441,6 +461,36 @@
 
       )
      c)))))
+
+(define (time-to-seconds t)
+  (/ (Math.floor (/ t 10)) 100))
+
+(define (nightjar-hiscores table c)
+  (msg "making")
+  (game-modify-update
+   (lambda (t c) c)
+   (game-modify-render
+    (lambda (ctx)
+      (set! ctx.font "normal 30pt 'Press Start 2P'")
+      (wrap-text ctx (string-append "Hi Scores") 0 100 1000 70)
+      (set! ctx.font "normal 20pt 'Press Start 2P'")
+      (index-for-each
+       (lambda (i e)
+         (msg e)
+         (let ((txt (string-append (car e) " : " (time-to-seconds (cadr e)))))
+           (set! ctx.fillStyle "#fff")
+           (if (eq? i 0)
+               (ctx.fillText txt 450 (+ 240 (* 30 i)))
+               (ctx.fillText txt 450 (+ 240 (* 30 i))))))
+       table)
+      )
+    (game-modify-buttons
+     (list
+      (image-button
+       "Back" 1150 720 #t (feather)
+       (lambda (c) (nightjar-intro c))))
+     c))))
+
 
 (define (nightjar-experiment-screen c)
   (game-modify-render
@@ -866,32 +916,111 @@
     (lambda (t c) c)
 
     (game-modify-buttons
-     (list
+     (append
+      (if (< (nightjar-level (game-data c)) 1)
+          (list
+           (image-button
+            "Level 2"
+            (- default-button-x 200)
+            (+ default-button-y 200)
+            #t
+            (feather)
+            (lambda (c)
+              (nightjar-new-game-images
+               (game-modify-data
+                (lambda (d)
+                  (nightjar-modify-level 1 d))
+                c)))))
+          (list))
+      (list
+       (image-button
+        "Enter Your Name"
+        (+ default-button-x 200)
+        (+ default-button-y 200)
+        #t
+        (feather)
+        (lambda (c)
+          (play-sound "sound/button.wav")
+          (nightjar-enter-name c)))
+       )) c))))
 
-     (image-button
-      "Level 2"
-      (- default-button-x 200)
-      (+ default-button-y 200)
-      #t
-      (feather)
-      (lambda (c)
-        (nightjar-new-game-images
-         (game-modify-data
-          (lambda (d)
-            (nightjar-modify-level 1 d))
-          c))))
 
 
-      (image-button
-       "Back"
-       (+ default-button-x 200)
-       (+ default-button-y 200)
-       #t
-       (feather)
-       (lambda (c)
-         (play-sound "sound/button.wav")
-         (nightjar-intro c)))
-      ) c))))
+(define (type-into str ch)
+  (car
+   (foldl
+    (lambda (c r)
+      (if (and (not (cadr r)) (eq? c "?"))
+          (list (string-append (car r) ch) #t)
+          (list (string-append (car r) c) (cadr r))))
+    (list "" #f)
+    (str.split ""))))
+
+(define (type-into-delete str)
+  (car (foldl
+        (lambda (c r)
+          (console.log (list c r))
+          (if (and (not (cadr r)) (not (eq? c "?")))
+              (list (string-append "?" (car r)) #t)
+              (list (string-append c (car r)) (cadr r))))
+        (list "" #f)
+        (reverse (str.split "")))))
+
+(define (type-username ch c)
+  (game-modify-data
+   (lambda (d)
+     (nightjar-modify-username (dbg (type-into (dbg (nightjar-username d)) ch)) d))
+   c))
+
+(define (type-delete c)
+  (game-modify-data
+   (lambda (d)
+     (nightjar-modify-username (type-into-delete (nightjar-username d)) d))
+   c))
+
+(define (nightjar-enter-name c)
+  (game-modify-update
+   (lambda (t c) c)
+   (game-modify-render
+    (lambda (ctx)
+      (set! ctx.font "normal 30pt 'Press Start 2P'")
+      (wrap-text ctx "Enter your name" 0 200 1000 70)
+      (set! ctx.font "normal 50pt 'Press Start 2P'")
+      (wrap-text ctx (nightjar-username (game-data c)) 0 280 1000 70)
+      (set! ctx.font "normal 30pt 'Press Start 2P'"))
+
+    (game-modify-buttons
+     (append
+      (index-map
+       (lambda (i ch)
+         (let ((x (+ 100 (* (modulo i 10) 105)))
+               (y (+ 400 (* (Math.floor (/ i 10)) 130))))
+           (image-button ch x y #f (small-feather)
+                         (lambda (c) (type-username ch c)))))
+       (list "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M"
+             "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z"))
+
+      (list
+       (image-button "Delete" 850 700 #t (feather)
+                     (lambda (c) (type-delete c)))
+
+       (image-button "Done" 1100 700 #t (feather)
+                     (lambda (c)
+                       (server-call
+                        "player-name"
+                        (list
+                         (list "player_id" (nightjar-player-id (game-data c)))
+                         (list "player_name" (nightjar-username (game-data c)))))
+                       (nightjar-intro c))))
+      )
+     c))))
+
+
+
+
+
+
+
 
 (set! ctx.font "normal 75pt gnuolane")
 (centre-text ctx "Loading..." 240)
@@ -900,6 +1029,9 @@
  (list "feather1.png"
        "feather2.png"
        "feather3.png"
+       "feather1s.png"
+       "feather2s.png"
+       "feather3s.png"
        "quit.png"
        "right.png"
        "wrong.png"

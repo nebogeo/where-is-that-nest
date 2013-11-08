@@ -109,7 +109,20 @@
         (pluto-response
          (scheme->json (list av
                              (get-player-rank db av)
-                             (if (not c) 0 c)))))))))
+                             (if (not c) 0 c)))))))
+
+   (register
+    (req 'hiscores '())
+    (lambda ()
+      (pluto-response
+       (scheme->json (get-hiscores db)))))
+
+
+   (register
+    (req 'player-name '(player_id player_name))
+    (lambda (player_id player_name)
+      (insert-player-name db player_id player_name)
+      (pluto-response (scheme->json '()))))))
 
 (define (start request)
   (let ((values (url-query (request-uri request))))

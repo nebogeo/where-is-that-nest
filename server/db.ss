@@ -21,6 +21,7 @@
 (define (setup db)
   (exec/ignore db "CREATE TABLE player ( id INTEGER PRIMARY KEY AUTOINCREMENT, species TEXT, played_before INTEGER, age_range INTEGER, score INTEGER)")
   (exec/ignore db "CREATE TABLE click ( id INTEGER PRIMARY KEY AUTOINCREMENT, player_id INTEGER, photo_name TEXT, photo_offset_x INTEGER, photo_offset_y INTEGER, time_stamp INTEGER, x_position INTEGER, y_position INTEGER, success INTEGER )")
+  (exec/ignore db "CREATE TABLE player_name ( id INTEGER PRIMARY KEY AUTOINCREMENT, player_id INTEGER, player_name TEXT )")
   )
 
 (define (insert-player db species played_before age_range)
@@ -44,6 +45,11 @@
               y_position "', '"
               success "')")))
 
+(define (insert-player-name db player_id player_name)
+  (log "player name " player_id " " player_name)
+  (insert db "INSERT INTO player_name VALUES (NULL, ?, ?)"
+          player_id player_name ))
+
 ;(define (get-player-averages db)
 ;  (let ((players (cdr (select db "SELECT * from player"))))
 ;    (filter
@@ -58,6 +64,12 @@
   (map
    (lambda (i) (vector-ref i 0))
    (cdr (select db "SELECT score from player"))))
+
+(define (get-hiscores db)
+  (map
+   (lambda (i)
+     (list (vector-ref i 0) (vector-ref i 1)))
+   (cdr (select db "select n.player_name, p.score from player as p join player_name as n on p.id=n.player_id order by p.score limit 100;"))))
 
 (define (get-player-average db player-id)
   (let ((v (cadr

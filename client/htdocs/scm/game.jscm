@@ -622,7 +622,7 @@
 
      (image-button
       "Vervet Monkey"
-      (+ default-button-x button-gap)
+      (+ default-button-x button-gap -110)
       default-button-y
       #f
       "monkey.png"
@@ -636,7 +636,7 @@
 
      (image-button
       "Genet"
-      (- default-button-x button-gap)
+      (- (- default-button-x button-gap) 110)
       default-button-y
       #f
       "genet.png"

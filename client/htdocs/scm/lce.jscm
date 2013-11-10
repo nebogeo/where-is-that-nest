@@ -85,8 +85,6 @@
 (define image-lib ())
 
 (define (load-image-mutate fn filename)
-  (msg "hello")
-  (msg filename)
   (let ((image (js "new Image()")))
     (set! image.onerror
           (lambda ()
@@ -137,6 +135,22 @@
 (define (centre-text ctx txt y)
   (let ((m (ctx.measureText txt)))
     (ctx.fillText txt (- (/ screen-width 2) (/ m.width 2)) y)))
+
+(define (shadow-text ctx text x y)
+  (set! ctx.fillStyle "#000")
+  (ctx.fillText text (+ x 4) (+ y 4))
+  (set! ctx.fillStyle "#fff")
+  (ctx.fillText text x y))
+
+
+(define (wrap-shadow-text ctx text x y max-width line-height)
+  (set! ctx.fillStyle "#000")
+  (ctx.save)
+  (ctx.translate 4 4)
+  (wrap-text ctx text x y max-width line-height)
+  (ctx.restore)
+  (set! ctx.fillStyle "#fff")
+  (wrap-text ctx text x y max-width line-height))
 
 (define (wrap-text ctx text x y max-width line-height)
   (define (wrap-text-inner words line y)
@@ -282,10 +296,15 @@
    (find-image (button-image b) image-lib)
    0 0)
 
-  (set! ctx.fillStyle "#fff")
+  (set! ctx.fillStyle "#000")
   (set! ctx.font "bold 30pt gnuolane")
 
   (let ((m (ctx.measureText (button-name b))))
+    (ctx.fillText
+     (button-name b)
+     (+ (- (/ (button-w b) 2) (/ m.width 2)) 4)
+     (+ 4 (/ (button-h b) 2) 5))
+    (set! ctx.fillStyle "#fff")
     (ctx.fillText
      (button-name b)
      (- (/ (button-w b) 2) (/ m.width 2))

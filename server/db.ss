@@ -19,69 +19,57 @@
 (require "logger.ss")
 
 (define (setup db)
-  (exec/ignore db "CREATE TABLE player ( id INTEGER PRIMARY KEY AUTOINCREMENT, species TEXT, played_before INTEGER, age_range INTEGER, score INTEGER)")
-  (exec/ignore db "CREATE TABLE click ( id INTEGER PRIMARY KEY AUTOINCREMENT, player_id INTEGER, photo_name TEXT, photo_offset_x INTEGER, photo_offset_y INTEGER, time_stamp INTEGER, x_position INTEGER, y_position INTEGER, success INTEGER )")
+  (exec/ignore db "CREATE TABLE player ( id INTEGER PRIMARY KEY AUTOINCREMENT, species TEXT, played_before INTEGER, age_range INTEGER, easy_score INTEGER, hard_score INTEGER)")
+  (exec/ignore db "CREATE TABLE click ( id INTEGER PRIMARY KEY AUTOINCREMENT, player_id INTEGER, photo_name TEXT, photo_offset_x INTEGER, photo_offset_y INTEGER, time_stamp INTEGER, x_position INTEGER, y_position INTEGER, success INTEGER, level TEXT )")
   (exec/ignore db "CREATE TABLE player_name ( id INTEGER PRIMARY KEY AUTOINCREMENT, player_id INTEGER, player_name TEXT )")
   )
 
 (define (insert-player db species played_before age_range)
   (log "player " species " " played_before " " age_range)
-  (insert db (string-append
-              "INSERT INTO player VALUES (NULL, '"
-              species "', '"
-              (if (equal? played_before "false") "0" "1") "', '"
-              age_range "', 999999)")))
+  (insert
+   db "INSERT INTO player VALUES (NULL, ?, ?, ?, 999999, 999999)"
+   species (if (equal? played_before "false") "0" "1") age_range ))
 
-(define (insert-click db player_id photo_name photo_offset_x photo_offset_y time_stamp x_position y_position success)
-  (log "click " player_id " " photo_name " " photo_offset_x " " photo_offset_y " " time_stamp " " x_position " " y_position " " success)
-  (insert db (string-append
-              "INSERT INTO click VALUES (NULL, '"
-              player_id "', '"
-              photo_name "', '"
-              photo_offset_x "', '"
-              photo_offset_y "', '"
-              time_stamp "', '"
-              x_position "', '"
-              y_position "', '"
-              success "')")))
+(define (insert-click db player_id photo_name photo_offset_x photo_offset_y time_stamp x_position y_position success level)
+  (log "click " player_id " " photo_name " " photo_offset_x " " photo_offset_y " " time_stamp " " x_position " " y_position " " success " " level)
+  (insert
+   db
+   "INSERT INTO click VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+   player_id photo_name photo_offset_x photo_offset_y time_stamp x_position
+   y_position success level))
 
 (define (insert-player-name db player_id player_name)
   (log "player name " player_id " " player_name)
-  (insert db "INSERT INTO player_name VALUES (NULL, ?, ?)"
+  (insert db "insert into player_name VALUES (NULL, ?, ?)"
           player_id player_name ))
 
-;(define (get-player-averages db)
-;  (let ((players (cdr (select db "SELECT * from player"))))
-;    (filter
-;     (lambda (av)
-;       (not (false? av)))
-;     (map
-;      (lambda (player)
-;        (get-player-average-min db (vector-ref player 0)))
-;      players))))
-
-(define (get-player-averages db)
+(define (get-player-averages db level)
   (map
    (lambda (i) (vector-ref i 0))
-   (cdr (select db "SELECT score from player"))))
+   (cdr
+    (select db (string-append "select " level "_score from player as p join player_name as n on p.id = n.player_id;")))))
 
 (define (get-hiscores db)
-  (map
-   (lambda (i)
-     (list (vector-ref i 0) (vector-ref i 1)))
-   (cdr (select db "select n.player_name, p.score from player as p join player_name as n on p.id=n.player_id order by p.score limit 100;"))))
+  (list
+   (map
+    (lambda (i)
+      (list (vector-ref i 0) (vector-ref i 1)))
+    (cdr (select db "select n.player_name, p.easy_score from player as p join player_name as n on p.id=n.player_id order by p.easy_score limit 100;")))
+   (map
+    (lambda (i)
+      (list (vector-ref i 0) (vector-ref i 1)))
+    (cdr (select db "select n.player_name, p.hard_score from player as p join player_name as n on p.id=n.player_id order by p.hard_score limit 100;")))))
 
-(define (get-player-average db player-id)
+(define (get-player-average db player-id level)
   (let ((v (cadr
-            (select db (string-append
-                        "SELECT avg(time_stamp), count(time_stamp) from click where success = 1 and player_id = "
-                        (number->string player-id))))))
+            (select db "select avg(time_stamp), count(time_stamp) from click where success = 1 and player_id = ? and level = ?"
+                    (number->string player-id) level))))
     (when (> (vector-ref v 1) 5)
           (exec/ignore
            db (string-append
-               "UPDATE player SET score = "
-               (number->string (vector-ref v 0))
-               " where id = " (number->string player-id))))
+               "update player set " level "_score = ? where id = ?")
+           (number->string (vector-ref v 0))
+           (number->string player-id)))
     (vector-ref v 0)))
 
 (define (get-player-count db player-id)
@@ -98,8 +86,8 @@
       (else (_ (+ n 1) (cdr l)))))
   (_ 1 ol))
 
-(define (get-player-rank db av)
+(define (get-player-rank db av level)
   (if av
-      (let ((rank (sort (get-player-averages db) <)))
+      (let ((rank (sort (get-player-averages db level) <)))
         (get-position av rank))
       999))

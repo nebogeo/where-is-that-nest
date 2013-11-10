@@ -1,11 +1,11 @@
 @font-face {
     font-family: 'stefanie';
-    src: url('http://nightjar.exeter.ac.uk/where-is-that-nightjar/fonts/StefanieDots.ttf');
+    src: url('../fonts/StefanieDots.ttf');
 }
 
 @font-face {
     font-family: 'gnuolane';
-    src: url('http://nightjar.exeter.ac.uk/where-is-that-nightjar/fonts/gnuolane.ttf');
+    src: url('../fonts/gnuolane.ttf');
 }
 
 html, body {

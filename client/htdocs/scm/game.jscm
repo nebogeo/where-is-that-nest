@@ -37,17 +37,38 @@
     "VC010-2013.jpg" "VC011-2013.jpg" "VC012-2013.jpg" "VC013-2013.jpg" "VC022.jpg"
     "VC026.jpg" "VC027.jpg" "VC037.jpg" "VS001-2013.jpg"))
 
+(define (filename-to-type fn)
+  (let ((a (fn.substring 0 2)))
+    (if (eq? a "Ch")
+        (let ((b (fn.substring 0 4)))
+          (cond
+           ((eq? b "ChMa") "white-fronted plover")
+           ((eq? b "ChTr") "three-banded plover")
+           ((eq? b "ChPa") "chestnut-banded plover")
+           (else (msg fn) (msg "unknown1:" fn b) "unknown plover")))
+        (cond
+         ((eq? a "Cu") "temminck's courser")
+         ((eq? a "RC") "bronze-winged courser")
+         ((eq? a "VS") "african wattled plover")
+         ((eq? a "VA") "blacksmith plover")
+         ((eq? a "VC") "crowned plover")
+         (else (msg fn) (msg "unknown:" fn a) "unknown other")))))
+
 (define filenames
   (list
-   (map (lambda (f) (string-append "easy/" f)) easy-filenames)
-   (map (lambda (f) (string-append "easy/mongoose-" f)) easy-filenames)
-   (map (lambda (f) (string-append "hard/" f)) hard-filenames)
-   (map (lambda (f) (string-append "hard/mongoose-" f)) hard-filenames)))
+   (map (lambda (f) (list (string-append "easy/" f) (filename-to-type f))) easy-filenames)
+   (map (lambda (f) (list (string-append "easy/mongoose-" f) (filename-to-type f))) easy-filenames)
+   (map (lambda (f) (list (string-append "hard/" f) (filename-to-type f))) hard-filenames)
+   (map (lambda (f) (list (string-append "hard/mongoose-" f) (filename-to-type f))) hard-filenames)))
 
 (define photos
   (map
    (lambda (l)
-     (map (lambda (fn) (+ "photos/" fn)) l))
+     (map
+      (lambda (fn)
+        (list
+         (+ "photos/" (car fn))
+         (cadr fn))) l))
    filenames))
 
 (define (easy-photos l) (list-ref l 0))
@@ -61,13 +82,14 @@
 (define (small-feather)
   (choose (list "feather1s.png" "feather2s.png" "feather3s.png")))
 
-(define (nightjar-example file pos width height)
-  (list file pos width height))
+(define (nightjar-example file pos width height desc)
+  (list file pos width height desc))
 
 (define (nightjar-example-file n) (list-ref n 0))
 (define (nightjar-example-pos n) (list-ref n 1))
 (define (nightjar-example-width n) (list-ref n 2))
 (define (nightjar-example-height n) (list-ref n 3))
+(define (nightjar-example-desc n) (list-ref n 4))
 
 ;; get from image structure
 (define image-width 2474)
@@ -194,10 +216,11 @@
                     easy-positions hard-positions) n)))
       (cons
        (nightjar-example
-        (list-ref photos n)
+        (car (list-ref photos n))
         (list (list-ref pos 0) (list-ref pos 1))
         (list-ref pos 2)
-        (list-ref pos 3))
+        (list-ref pos 3)
+        (cadr (list-ref photos n)))
        (build-examples (- n 1) photos level))))))
 
 (define nightjar-examples
@@ -206,8 +229,6 @@
    (build-examples (- (length (easy-mongoose-photos photos)) 1) (easy-mongoose-photos photos) 0)
    (build-examples (- (length (hard-photos photos)) 1) (hard-photos photos) 1)
    (build-examples (- (length (hard-mongoose-photos photos)) 1) (hard-mongoose-photos photos) 1)))
-
-(msg "hello")
 
 (define safe-x 0.2)
 (define safe-y 0.2)
@@ -250,24 +271,16 @@
 (define (nightjar-modify-username v g) (list-replace g 11 v))
 
 (define (nightjar-heading ctx txt)
-  (set! ctx.fillStyle "#000")
   (set! ctx.font "normal 75pt stefanie")
-  (ctx.save)
-  (ctx.translate 4 4)
-  (wrap-text ctx txt 100 200 1000 100)
-  (ctx.restore)
-  (set! ctx.fillStyle "#fff")
-  (set! ctx.font "normal 75pt stefanie")
-  (wrap-text ctx txt 100 200 1000 100))
-
+  (wrap-shadow-text ctx txt 100 200 1000 100))
 
 (define (nightjar-text ctx txt)
   (set! ctx.font "bold 25pt gnuolane")
-  (wrap-text ctx txt 100 400 1000 50))
+  (wrap-shadow-text ctx txt 100 400 1000 50))
 
 (define (nightjar-all-text ctx txt)
   (set! ctx.font "bold 50pt gnuolane")
-  (wrap-text ctx txt 100 200 1000 75))
+  (wrap-shadow-text ctx txt 100 200 1000 75))
 
 (define (time-left c)
   (* (- (game-time c)
@@ -410,8 +423,7 @@
           "hiscores" ()
           (lambda (game data)
             (let ((hiscores (JSON.parse data)))
-              (msg "in")
-              (dbg (nightjar-hiscores hiscores game)))))
+              (nightjar-hiscores hiscores game))))
          (play-sound "sound/button.wav")
          c))
 
@@ -457,8 +469,6 @@
          (set! window.location "http://fo.am")
          c))
 
-
-
       )
      c)))))
 
@@ -466,23 +476,31 @@
   (/ (Math.floor (/ t 10)) 100))
 
 (define (nightjar-hiscores table c)
-  (msg "making")
   (game-modify-update
    (lambda (t c) c)
    (game-modify-render
     (lambda (ctx)
-      (set! ctx.font "normal 30pt 'Press Start 2P'")
-      (wrap-text ctx (string-append "Hi Scores") 0 100 1000 70)
-      (set! ctx.font "normal 20pt 'Press Start 2P'")
+      (set! ctx.font "bold 50pt gnuolane")
+      (wrap-shadow-text ctx (string-append "Hall of fame") 0 100 1000 70)
+      (set! ctx.font "bold 30pt gnuolane")
+
+      (shadow-text ctx "Easy nests" 350 190)
+      (shadow-text ctx "Hard nests" 800 190)
       (index-for-each
        (lambda (i e)
-         (msg e)
-         (let ((txt (string-append (car e) " : " (time-to-seconds (cadr e)))))
-           (set! ctx.fillStyle "#fff")
-           (if (eq? i 0)
-               (ctx.fillText txt 450 (+ 240 (* 30 i)))
-               (ctx.fillText txt 450 (+ 240 (* 30 i))))))
-       table)
+         (when (not (eq? (cadr e) 999999))
+               (let ((txt (string-append (car e) " : " (time-to-seconds (cadr e)))))
+                 (shadow-text ctx txt 350 (+ 240 (* 40 i))))))
+       (car table))
+
+      (index-for-each
+       (lambda (i e)
+         (when (not (eq? (cadr e) 999999))
+               (let ((txt (string-append (car e) " : " (time-to-seconds (cadr e)))))
+                 (set! ctx.fillStyle "#fff")
+                 (shadow-text ctx txt 800 (+ 240 (* 40 i))))))
+       (cadr table))
+
       )
     (game-modify-buttons
      (list
@@ -497,7 +515,7 @@
    (lambda (ctx)
      (nightjar-all-text ctx "We would like to use results from your game for a scientific publication, is that ok?")
      (set! ctx.font "bold 30pt gnuolane")
-     (wrap-text ctx "We are using age and timing information" 100 450 1000 75))
+     (wrap-shadow-text ctx "We are using age and timing information" 100 450 1000 75))
 
    (game-modify-buttons
     (list
@@ -597,17 +615,17 @@
    (lambda (ctx)
      (nightjar-all-text ctx "What predator species would you like to be?")
      (set! ctx.font "bold 30pt gnuolane")
-     (wrap-text ctx "They see the world differently..." 100 400 1000 75))
+     (wrap-shadow-text ctx "They see the world differently..." 100 400 1000 75))
 
    (game-modify-buttons
     (list
 
      (image-button
-      "Baboon"
+      "Vervet Monkey"
       (+ default-button-x button-gap)
       default-button-y
-      #t
-      (feather)
+      #f
+      "monkey.png"
       (lambda (c)
         (play-sound "sound/button.wav")
         (nightjar-explain-screen
@@ -620,8 +638,8 @@
       "Genet"
       (- default-button-x button-gap)
       default-button-y
-      #t
-      (feather)
+      #f
+      "genet.png"
       (lambda (c)
         (play-sound "sound/button.wav")
         (nightjar-explain-screen
@@ -646,16 +664,17 @@
 (define (nightjar-explain-screen c)
   (game-modify-render
    (lambda (ctx)
-     (ctx.drawImage (find-image "nightjar.jpg" image-lib) 250 200)
+     (ctx.drawImage (find-image "nightjar.jpg" image-lib) 250 250)
      (set! ctx.font "bold 50pt gnuolane")
-     (wrap-text ctx "There is one nest hidden in every photo, touch it as soon as you see it" 100 100 1000 75))
+     (wrap-shadow-text ctx "There is one nest hidden in every photo, touch or click on it as soon as you see it" 100 100 1000 75)
+     (wrap-shadow-text ctx "Choose your difficulty level" 100 650 1000 75))
    (game-modify-buttons
     (list
 
      (image-button
-      "Level 1"
-      default-button-x
-      (+ default-button-y 200)
+      "Easy Nests"
+      (- default-button-x 200)
+      (+ default-button-y 150)
       #t
       (feather)
       (lambda (c)
@@ -670,9 +689,36 @@
              ;;(alert id)
              (game-modify-data
               (lambda (d)
-                (nightjar-modify-player-id id d))
+                (nightjar-modify-player-id
+                 id (nightjar-modify-level 0 d)))
               game))))
-        (nightjar-new-game-images c))))
+        (nightjar-new-game-images c)))
+
+     (image-button
+      "Hard Nests"
+      (+ default-button-x 200)
+      (+ default-button-y 150)
+      #t
+      (feather)
+      (lambda (c)
+        (server-call-mutate
+         "player"
+         (list
+          (list "species" (nightjar-player-type (game-data c)))
+          (list "played_before" (nightjar-played-before (game-data c)))
+          (list "age_range" (nightjar-player-age (game-data c))))
+         (lambda (game data)
+           (let ((id (car (JSON.parse data))))
+             ;;(alert id)
+             (game-modify-data
+              (lambda (d)
+                (nightjar-modify-player-id
+                 id (nightjar-modify-level 1 d)))
+              game))))
+        (nightjar-new-game-images c)))
+
+
+     )
 
     c)))
 
@@ -687,7 +733,8 @@
     (list "time_stamp" (- (game-time c) (nightjar-photo-time (game-data c))))
     (list "x_position" (game-mx c))
     (list "y_position" (game-my c))
-    (list "success" success))))
+    (list "success" success)
+    (list "level" (if (eq? (nightjar-level (game-data c)) 0) "easy" "hard")))))
 
 
 (define (nightjar-game c)
@@ -715,7 +762,12 @@
       (if (> (- (game-time c)
                 (nightjar-start-time (game-data c)))
              (* game-time-allowed 1000))
-          (nightjar-fail "You'll go hungry tonight!" c)
+          (nightjar-fail
+           (nightjar-example-desc example)
+           (string-append
+            "Ran out of time finding this "
+            (nightjar-example-desc example)
+            " nest - you'll go hungry tonight!") c)
           c))
 
     (game-modify-buttons
@@ -728,7 +780,13 @@
        #f
        "quit.png"
        (lambda (c)
-         (nightjar-fail "You'll go hungry tonight!" c)))
+         (nightjar-fail
+          (nightjar-example-desc example)
+          (string-append
+           "You couldn't find this "
+           (nightjar-example-desc example)
+           " nest - you'll go hungry tonight!")
+          c)))
 
       ;; button over nightjar
       (rect-button
@@ -745,6 +803,7 @@
        (lambda (c)
          (play-sound "sound/found.wav")
          (nightjar-win
+          (nightjar-example-desc example)
           (game-modify-data
            (lambda (d)
              (record-click c 1)
@@ -773,7 +832,7 @@
 
       ) c))))
 
-(define (nightjar-fail reason c)
+(define (nightjar-fail desc reason c)
   (game-modify-render
    (lambda (ctx)
      (define example (car (nightjar-images (game-data c))))
@@ -835,7 +894,7 @@
 
       ) c))))
 
-(define (nightjar-win c)
+(define (nightjar-win desc c)
   (game-modify-render
    (lambda (ctx)
      (define example (car (nightjar-images (game-data c))))
@@ -851,9 +910,9 @@
       (nightjar-sprite (game-data c)))
 
      (let ((done (+ (- 20 (length (nightjar-images (game-data c)))) 1)))
-       (nightjar-heading ctx (+ "Nest " done "/20 found in "
-                                (/ (nightjar-score (game-data c)) 1000)
-                                " seconds"))))
+       (nightjar-all-text ctx (+ "You found this " desc "'s nest in "
+                                 (/ (nightjar-score (game-data c)) 1000)
+                                 " seconds. " (- 20 done) " left to go!"))))
 
    (game-modify-update
     (lambda (t c) c)
@@ -877,7 +936,8 @@
   (server-call-mutate
    "score"
    (list
-    (list "player_id" (nightjar-player-id (game-data c))))
+    (list "player_id" (nightjar-player-id (game-data c)))
+    (list "level" (if (eq? (nightjar-level (game-data c)) 0) "easy" "hard")))
    (lambda (game data)
      (let ((score (JSON.parse data)))
        (nightjar-finish game
@@ -895,9 +955,9 @@
    (else (+ score "th"))))
 
 (define (get-score-text score count)
-  (if (and (< score 11) (> count 5))
-      (+ " You are in the top ten! You are " (score-to-text score))
-      " You've not made the top ten..."))
+  (if (> count 5)
+      (+ " You made position " score)
+      "Find more eggs to get a ranking."))
 
 (define (trunc a)
   (/ (Math.floor (* a 100)) 100))
@@ -909,41 +969,35 @@
      (nightjar-all-text
       ctx (+ reason " Your average nightjar spotting time is " (trunc (/ av 1000)) " seconds."))
 
-     (wrap-text ctx (get-score-text score count) 100 430 1000 75)
-     (wrap-text ctx "For more information head to nightjar.exeter.ac.uk" 100 570 1000 75))
+     (wrap-shadow-text ctx (get-score-text score count) 100 430 1000 75)
+     (wrap-shadow-text ctx "For more information head to nightjar.exeter.ac.uk" 100 570 1000 75))
 
    (game-modify-update
     (lambda (t c) c)
 
     (game-modify-buttons
-     (append
-      (if (< (nightjar-level (game-data c)) 1)
-          (list
-           (image-button
-            "Level 2"
-            (- default-button-x 200)
-            (+ default-button-y 200)
-            #t
-            (feather)
-            (lambda (c)
-              (nightjar-new-game-images
-               (game-modify-data
-                (lambda (d)
-                  (nightjar-modify-level 1 d))
-                c)))))
-          (list))
-      (list
-       (image-button
-        "Enter Your Name"
-        (+ default-button-x 200)
-        (+ default-button-y 200)
-        #t
-        (feather)
-        (lambda (c)
-          (play-sound "sound/button.wav")
-          (nightjar-enter-name c)))
-       )) c))))
+     (list
+      (if (> count 5)
+          (image-button
+           "Enter Your Name"
+           default-button-x
+           (+ default-button-y 200)
+           #t
+           (feather)
+           (lambda (c)
+             (play-sound "sound/button.wav")
+             (nightjar-enter-name c)))
 
+          (image-button
+           "Back"
+           default-button-x
+           (+ default-button-y 200)
+           #t
+           (feather)
+           (lambda (c)
+             (play-sound "sound/button.wav")
+             (nightjar-intro c)))))
+     c))))
 
 
 (define (type-into str ch)
@@ -983,11 +1037,11 @@
    (lambda (t c) c)
    (game-modify-render
     (lambda (ctx)
-      (set! ctx.font "normal 30pt 'Press Start 2P'")
-      (wrap-text ctx "Enter your name" 0 200 1000 70)
-      (set! ctx.font "normal 50pt 'Press Start 2P'")
-      (wrap-text ctx (nightjar-username (game-data c)) 0 280 1000 70)
-      (set! ctx.font "normal 30pt 'Press Start 2P'"))
+      (set! ctx.font "bold 30pt gnuolane")
+      (wrap-shadow-text ctx "Enter your name" 0 200 1000 70)
+      (set! ctx.font "bold 50pt gnuolane")
+      (wrap-shadow-text ctx (nightjar-username (game-data c)) 0 280 1000 70)
+      (set! ctx.font "bold 30pt gnuolane"))
 
     (game-modify-buttons
      (append
@@ -1041,6 +1095,8 @@
        "foam.png"
        "sensory-ecology.png"
        "back.png"
-       "nightjar.jpg")
+       "nightjar.jpg"
+       "genet.png"
+       "monkey.png")
  (lambda ()
    (start-game canvas ctx)))

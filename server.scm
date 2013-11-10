@@ -80,7 +80,8 @@
                   time_stamp
                   x_position
                   y_position
-                  success))
+                  success
+                  level))
     (lambda (player_id
              photo_name
              photo_offset_x
@@ -88,7 +89,8 @@
              time_stamp
              x_position
              y_position
-             success)
+             success
+             level)
       (let* ((id (insert-click
                   db
                   player_id
@@ -98,17 +100,18 @@
                   time_stamp
                   x_position
                   y_position
-                  success)))
+                  success
+                  level)))
         (pluto-response (scheme->json '())))))
 
    (register
-    (req 'score '(player_id))
-    (lambda (player-id)
-      (let ((av (get-player-average db (string->number player-id)))
+    (req 'score '(player_id level))
+    (lambda (player-id level)
+      (let ((av (get-player-average db (string->number player-id) level))
             (c (get-player-count db (string->number player-id))))
         (pluto-response
          (scheme->json (list av
-                             (get-player-rank db av)
+                             (get-player-rank db av level)
                              (if (not c) 0 c)))))))
 
    (register

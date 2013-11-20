@@ -435,35 +435,42 @@
          c))
 
       (image-button
-       "" (+ icon-x 50) (+ icon-y 190) #f "sensory-ecology.png"
+       "" (+ icon-x 0) (+ icon-y 190) #f "sensory-ecology.png"
        (lambda (c)
          (play-sound "sound/button.wav")
          (set! window.location "http://www.sensoryecology.com/")
          c))
 
       (image-button
-       "" (+ icon-x 200) (+ icon-y 200) #f "exeter.png"
+       "" (+ icon-x 120) (+ icon-y 190) #f "cuckoos.png"
+       (lambda (c)
+         (play-sound "sound/button.wav")
+         (set! window.location "http://www2.zoo.cam.ac.uk/africancuckoos/home.html")
+         c))
+
+      (image-button
+       "" (+ icon-x 270) (+ icon-y 200) #f "exeter.png"
        (lambda (c)
          (play-sound "sound/button.wav")
          (set! window.location "http://www.exeter.ac.uk/")
          c))
 
       (image-button
-       "" (+ icon-x 400) (+ icon-y 200) #f "cu.png"
+       "" (+ icon-x 450) (+ icon-y 200) #f "cu.png"
        (lambda (c)
          (play-sound "sound/button.wav")
          (set! window.location "http://www.zoo.cam.ac.uk/")
          c))
 
       (image-button
-       "" (+ icon-x 600) (+ icon-y 200) #f "bbsrc.png"
+       "" (+ icon-x 650) (+ icon-y 200) #f "bbsrc.png"
        (lambda (c)
          (play-sound "sound/button.wav")
          (set! window.location "http://www.bbsrc.ac.uk/")
          c))
 
       (image-button
-       "" (+ icon-x 850) (+ icon-y 205) #f "foam.png"
+       "" (+ icon-x 900) (+ icon-y 205) #f "foam.png"
        (lambda (c)
          (play-sound "sound/button.wav")
          (set! window.location "http://fo.am")
@@ -1092,6 +1099,7 @@
        "bbsrc.png"
        "cu.png"
        "exeter.png"
+       "cuckoos.png"
        "foam.png"
        "sensory-ecology.png"
        "back.png"

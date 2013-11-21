@@ -699,12 +699,13 @@
          (lambda (game data)
            (let ((id (car (JSON.parse data))))
              ;;(alert id)
-             (game-modify-data
-              (lambda (d)
-                (nightjar-modify-player-id
-                 id (nightjar-modify-level 0 d)))
-              game))))
-        (nightjar-new-game-images c)))
+             (nightjar-new-game-images
+              (game-modify-data
+               (lambda (d)
+                 (nightjar-modify-player-id
+                  id (nightjar-modify-level 0 d)))
+               game)))))
+         c))
 
      (image-button
       "Hard Nests"
@@ -722,12 +723,13 @@
          (lambda (game data)
            (let ((id (car (JSON.parse data))))
              ;;(alert id)
-             (game-modify-data
-              (lambda (d)
-                (nightjar-modify-player-id
-                 id (nightjar-modify-level 1 d)))
-              game))))
-        (nightjar-new-game-images c)))
+             (nightjar-new-game-images
+              (game-modify-data
+               (lambda (d)
+                 (nightjar-modify-player-id
+                  id (nightjar-modify-level 1 d)))
+               game)))))
+         c))
 
 
      )

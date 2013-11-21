@@ -365,7 +365,10 @@
                         (easy-mongoose-photos nightjar-examples)
                         (hard-mongoose-photos nightjar-examples))))))
 
-    (msg (nightjar-level (game-data c)) (eq? (nightjar-level (game-data c)) 0) examples)
+    (console.log "tetetetet")
+    (console.log (nightjar-level (game-data c)))
+    (console.log (eq? (nightjar-level (game-data c)) 0))
+    (console.log examples)
 
   (play-sound "sound/button.wav")
 

@@ -365,11 +365,6 @@
                         (easy-mongoose-photos nightjar-examples)
                         (hard-mongoose-photos nightjar-examples))))))
 
-    (console.log "tetetetet")
-    (console.log (nightjar-level (game-data c)))
-    (console.log (eq? (nightjar-level (game-data c)) 0))
-    (console.log examples)
-
   (play-sound "sound/button.wav")
 
   (let ((images (crop (shuffle examples) 20)))
@@ -1027,7 +1022,7 @@
 (define (type-into-delete str)
   (car (foldl
         (lambda (c r)
-          (console.log (list c r))
+          ;;(console.log (list c r))
           (if (and (not (cadr r)) (not (eq? c "?")))
               (list (string-append "?" (car r)) #t)
               (list (string-append c (car r)) (cadr r))))

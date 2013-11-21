@@ -365,6 +365,8 @@
                         (easy-mongoose-photos nightjar-examples)
                         (hard-mongoose-photos nightjar-examples))))))
 
+    (msg (nightjar-level (game-data c)) (eq? (nightjar-level (game-data c)) 0) examples)
+
   (play-sound "sound/button.wav")
 
   (let ((images (crop (shuffle examples) 20)))

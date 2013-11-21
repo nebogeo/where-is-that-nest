@@ -357,11 +357,11 @@
 (define (nightjar-new-game-images c)
   (let ((examples (cond
                    ((eq? (nightjar-player-type (game-data c)) "monkey")
-                    (if (zero? (nightjar-level (game-data c)))
+                    (if (eq? (nightjar-level (game-data c)) 0)
                         (easy-photos nightjar-examples)
                         (hard-photos nightjar-examples)))
                    (else
-                    (if (zero? (nightjar-level (game-data c)))
+                    (if (eq? (nightjar-level (game-data c)) 0)
                         (easy-mongoose-photos nightjar-examples)
                         (hard-mongoose-photos nightjar-examples))))))
 

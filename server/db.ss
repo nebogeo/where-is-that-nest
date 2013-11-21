@@ -44,10 +44,12 @@
           player_id player_name ))
 
 (define (get-player-averages db level)
-  (map
-   (lambda (i) (vector-ref i 0))
-   (cdr
-    (select db (string-append "select " level "_score from player as p join player_name as n on p.id = n.player_id;")))))
+  (let ((s (select db (string-append "select " level "_score from player as p join player_name as n on p.id = n.player_id;"))))
+    (if (null? s)
+        '()
+        (map
+         (lambda (i) (vector-ref i 0))
+         (cdr s)))))
 
 (define (get-hiscores db)
   (list
